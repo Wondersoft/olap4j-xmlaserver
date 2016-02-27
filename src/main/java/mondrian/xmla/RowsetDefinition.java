@@ -869,13 +869,13 @@ public enum RowsetDefinition {
             MdschemaMeasuresRowset.LevelsList,
             MdschemaMeasuresRowset.Description,
             MdschemaMeasuresRowset.FormatString,
-        },
-        new Column[] {
-            MdschemaMeasuresRowset.CatalogName,
-            MdschemaMeasuresRowset.SchemaName,
-            MdschemaMeasuresRowset.CubeName,
-            MdschemaMeasuresRowset.MeasureName,
-        })
+        },null) // bad idea to sort on measure name, leave it to cube definition, please
+//        new Column[] {
+//            MdschemaMeasuresRowset.CatalogName,
+//            MdschemaMeasuresRowset.SchemaName,
+//            MdschemaMeasuresRowset.CubeName,
+//            MdschemaMeasuresRowset.MeasureName,
+//        })
     {
         public Rowset getRowset(XmlaRequest request, XmlaHandler handler) {
             return new MdschemaMeasuresRowset(request, handler);
@@ -5280,7 +5280,7 @@ TODO: see above
                 null,
                 Column.NOT_RESTRICTION,
                 Column.OPTIONAL,
-                "Memeber GUID.");
+                "Member GUID.");
         private static final Column MemberCaption =
             new Column(
                 "MEMBER_CAPTION",
@@ -5674,7 +5674,7 @@ TODO: see above
                 ChildrenCardinality.name,
                 member.getPropertyValue(
                     Property.StandardMemberProperty.CHILDREN_CARDINALITY));
-            row.set(ChildrenCardinality.name, 100);
+        // Why set cardinality to 100 ?    row.set(ChildrenCardinality.name, 100);
 
             if (adjustedLevelDepth == 0) {
                 row.set(ParentLevel.name, 0);
@@ -6011,10 +6011,15 @@ TODO: see above
             OlapConnection connection =
                 handler.getConnection(
                     request, Collections.<String, String>emptyMap());
-            for (Catalog catalog
-                : catIter(connection, catNameCond(), catalogCond))
-            {
-                populateCatalog(catalog, rows);
+            try{
+            	for (Catalog catalog
+            			: catIter(connection, catNameCond(), catalogCond))
+            	{
+            		populateCatalog(catalog, rows);
+            	}
+            }finally{
+            	// Closing connection is necessary
+            	connection.close();
             }
         }
 

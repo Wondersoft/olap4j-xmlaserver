@@ -132,11 +132,15 @@ public class XmlaHandler {
                     "unexpected restriction type: " + restriction.getClass());
             }
         }
+        
+        // Method getConnection accepts arguments catalogName, schemaName, 
+        // not databaseName, catalogName
+        String schemaName = null;
 
         return
             getConnection(
-                databaseName,
                 catalogName,
+                schemaName,
                 request.getRoleName(),
                 props);
     }
@@ -1650,7 +1654,7 @@ public class XmlaHandler {
         OlapConnection connection = null;
         PreparedOlapStatement statement = null;
         CellSet cellSet = null;
-        boolean success = false;
+       
         try {
             connection =
                 getConnection(request, Collections.<String, String>emptyMap());
@@ -1687,7 +1691,7 @@ public class XmlaHandler {
                     dataSet =
                         new MDDataSet_Tabular(cellSet);
                 }
-                success = true;
+                
                 return dataSet;
             } catch (XmlaException ex) {
                 throw ex;
@@ -1699,30 +1703,33 @@ public class XmlaHandler {
                     ex);
             }
         } finally {
-            if (!success) {
+        	// closing resources must be ensured
                 if (cellSet != null) {
                     try {
-                        cellSet.close();
+                    	if(!cellSet.isClosed())
+                    		cellSet.close();
                     } catch (SQLException e) {
                         // ignore
                     }
                 }
                 if (statement != null) {
                     try {
-                        statement.close();
+                    	if(!statement.isClosed())
+                    		statement.close();
                     } catch (SQLException e) {
                         // ignore
                     }
                 }
                 if (connection != null) {
                     try {
-                        connection.close();
+                    	if(!connection.isClosed())
+                    		connection.close();
                     } catch (SQLException e) {
                         // ignore
                     }
                 }
             }
-        }
+
     }
 
     private static Format getFormat(
@@ -1799,7 +1806,7 @@ public class XmlaHandler {
         }
 
         public void close() throws SQLException {
-            cellSet.getStatement().getConnection().close();
+            // cellSet.getStatement().getConnection().close();
         }
 
         private static Property rename(
