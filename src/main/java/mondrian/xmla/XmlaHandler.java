@@ -2013,7 +2013,8 @@ public class XmlaHandler {
             for (Hierarchy hierarchy : hierarchies) {
                 writer.startElement(
                     "HierarchyInfo",
-                    "name", hierarchy.getName());
+                    "name", hierarchy.getName(),
+                    "caption", hierarchy.getCaption());
                 for (final Property prop : props) {
                     final String encodedProp =
                         encoder.encode(prop.getName());
